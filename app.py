@@ -3,6 +3,7 @@ import time
 import random
 import matplotlib.pyplot as plt
 import sys
+import pandas as pd
 
 sys.setrecursionlimit(20000)
 
@@ -25,21 +26,24 @@ def max_crossing_sum(arr, low, mid, high):
     for i in range(mid, low - 1, -1):
         total += arr[i]
         if total > left_sum: left_sum = total
+        
     right_sum = float('-inf')
     total = 0
     for i in range(mid + 1, high + 1):
         total += arr[i]
         if total > right_sum: right_sum = total
+        
     return left_sum + right_sum
 
 def solve_dc(arr, low, high):
     if low == high: return arr[low]
+    
     mid = (low + high) // 2
+    
     return max(solve_dc(arr, low, mid),
                solve_dc(arr, mid + 1, high),
                max_crossing_sum(arr, low, mid, high))
 
-# STREAMLIT
 st.title("📊 Analisis Kompleksitas: Brute Force vs Divide & Conquer")
 st.markdown("### Kasus: Maximum Subarray Problem")
 
@@ -47,53 +51,82 @@ menu = st.sidebar.selectbox("Pilih Menu", ["Home", "Input Data", "Benchmark Graf
 
 if menu == "Home":
     st.info("Topik ini membandingkan efisiensi O(n²) vs O(n log n).")
-    st.write("**Brute Force:** Mengecek setiap subarray satu per satu.")
+    st.write("**Brute Force:** Mengecek setiap subarray satu per satu secara iteratif.")
     st.write("**Divide & Conquer:** Memecah array menjadi bagian kecil secara rekursif.")
+    
     st.markdown("### Studi Kasus")
-    st.write("Studi Kasus ini berfokus pada penyelesaian Maximum Subarray Problem, yaitu mencari sebuah subarray kontigu di dalam sebuah array satu dimensi angka yang memiliki jumlah (sum) terbesar. Masalah ini relevan dalam bidang analisis data keuangan (mencari periode keuntungan maksimal) maupun pemrosesan citra. Fokus utama penelitian ini adalah membandingkan efisiensi waktu eksekusi antara pendekatan Brute Force (Iteratif) dengan pendekatan Divide and Conquer (Rekursif) ")
+    st.write("""
+    Studi Kasus ini berfokus pada penyelesaian Maximum Subarray Problem, yaitu mencari sebuah subarray kontigu 
+    di dalam sebuah array satu dimensi angka yang memiliki jumlah (sum) terbesar. Masalah ini sangat relevan 
+    dalam analisis data keuangan dan pemrosesan citra. Fokus utama penelitian ini adalah membandingkan 
+    efisiensi waktu eksekusi antara pendekatan Brute Force (Iteratif) dengan pendekatan Divide and Conquer (Rekursif).
+    """)
+    
     st.markdown("### ANALYSIS AND RESULTS")
-    st.write("Analisis ini membandingkan efisiensi Brute Force ($O(n^2)$) dan Divide and Conquer O(n log n). Hasil pengujian menunjukkan bahwa pendekatan Divide and Conquer jauh lebih cepat dan stabil pada dataset skala besar. Sebaliknya, pendekatan Brute Force mengalami lonjakan waktu eksekusi yang drastis seiring bertambahnya jumlah input data karena kompleksitasnya yang lebih tinggi. ")
+    st.write("""
+    Analisis ini membandingkan efisiensi Brute Force ($O(n^2)$) dan Divide and Conquer ($O(n \log n)$). 
+    Hasil pengujian menunjukkan bahwa pendekatan Divide and Conquer jauh lebih cepat dan stabil pada dataset 
+    skala besar. Sebaliknya, pendekatan Brute Force mengalami lonjakan waktu eksekusi yang drastis seiring 
+    bertambahnya jumlah input data karena kompleksitas kuadratiknya.
+    """)
+
 elif menu == "Input Data":
-    st.subheader("⌨️ Coba Input Data")
+    st.subheader("⌨️ Coba Input Data Manual")
     user_input = st.text_input("Masukkan angka dipisah spasi", "-2 1 -3 4 -1 2 1 -5 4")
+    
     if st.button("Hitung"):
-        data = [int(x) for x in user_input.split()]
-        res_bf = solve_brute_force(data)
-        res_dc = solve_dc(data, 0, len(data)-1)
-        
-        col1, col2 = st.columns(2)
-        col1.metric("Hasil Brute Force", res_bf)
-        col2.metric("Hasil Divide & Conquer", res_dc)
-        st.success("Hasil Keduanya Valid & Sama")
+        try:
+            data = [int(x) for x in user_input.split()]
+            res_bf = solve_brute_force(data)
+            res_dc = solve_dc(data, 0, len(data)-1)
+            
+            col1, col2 = st.columns(2)
+            col1.metric("Hasil Brute Force", res_bf)
+            col2.metric("Hasil Divide & Conquer", res_dc)
+            st.success("Hasil Keduanya Valid & Sama!")
+        except ValueError:
+            st.error("Pastikan input hanya berupa angka yang dipisahkan spasi.")
 
 elif menu == "Benchmark Grafik":
-    st.subheader("📈 Analisis Running Time")
+    st.subheader("📈 Analisis Running Time (Grafik & Tabel)")
+    
     if st.button("Mulai Benchmark"):
         sizes = [10, 100, 500, 1000, 2000, 3000, 4000, 5000]
         t_bf, t_dc = [], []
         
         progress_bar = st.progress(0)
+        
         for i, n in enumerate(sizes):
             data = [random.randint(-100, 100) for _ in range(n)]
             
-            # BF
             start = time.time()
             solve_brute_force(data)
             t_bf.append(time.time() - start)
             
-            # DC
             start = time.time()
             solve_dc(data, 0, len(data)-1)
             t_dc.append(time.time() - start)
             
             progress_bar.progress((i + 1) / len(sizes))
 
-        fig, ax = plt.subplots()
-        ax.plot(sizes, t_bf, 'r-o', label="Brute Force O(n²)")
-        ax.plot(sizes, t_dc, 'b-o', label="Divide & Conquer O(n log n)")
+        st.write("#### Visualisasi Running Time")
+        fig, ax = plt.subplots(figsize=(10, 5))
+        ax.plot(sizes, t_bf, 'r-o', label="Brute Force $O(n^2)$")
+        ax.plot(sizes, t_dc, 'b-o', label="Divide & Conquer $O(n \log n)$")
         ax.set_xlabel("Ukuran Data (n)")
         ax.set_ylabel("Waktu (detik)")
         ax.legend()
         ax.grid(True)
         st.pyplot(fig)
-        st.write("Terlihat jelas bahwa garis merah (Brute Force) naik secara dratis.")
+        st.write("Terlihat jelas bahwa garis merah (Brute Force) naik secara dratis dibandingkan garis biru.")
+
+        st.divider()
+        st.write("#### 📋 Tabel Perbandingan Waktu Eksekusi")
+        
+        df_hasil = pd.DataFrame({
+            "Input (n)": sizes,
+            "Iterative Time (s)": [f"{t:.8f}" for t in t_bf],
+            "Recursive Time (s)": [f"{t:.8f}" for t in t_dc]
+        })
+        
+        st.table(df_hasil)
