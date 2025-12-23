@@ -4,12 +4,10 @@ import random
 import matplotlib.pyplot as plt
 import sys
 
-# Optimasi untuk Streamlit
 sys.setrecursionlimit(20000)
 
 st.set_page_config(page_title="Analisis Algoritma - Maximum Subarray", layout="wide")
 
-# --- ALGORITMA ---
 def solve_brute_force(arr):
     n = len(arr)
     max_so_far = float('-inf')
@@ -41,7 +39,7 @@ def solve_dc(arr, low, high):
                solve_dc(arr, mid + 1, high),
                max_crossing_sum(arr, low, mid, high))
 
-# --- UI STREAMLIT ---
+# STREAMLIT
 st.title("📊 Analisis Kompleksitas: Brute Force vs Divide & Conquer")
 st.markdown("### Kasus: Maximum Subarray Problem")
 
@@ -90,7 +88,6 @@ elif menu == "Benchmark Grafik":
             
             progress_bar.progress((i + 1) / len(sizes))
 
-        # Plotting
         fig, ax = plt.subplots()
         ax.plot(sizes, t_bf, 'r-o', label="Brute Force O(n²)")
         ax.plot(sizes, t_dc, 'b-o', label="Divide & Conquer O(n log n)")
